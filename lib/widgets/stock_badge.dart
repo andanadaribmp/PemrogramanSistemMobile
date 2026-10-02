@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../models/product.dart';
+import '../theme/app_theme.dart';
 
 class StockBadge extends StatelessWidget {
   final StockStatus status;
 
-  const StockBadge({
-    super.key,
-    required this.status,
-  });
+  const StockBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +16,7 @@ class StockBadge extends StatelessWidget {
     switch (status) {
       case StockStatus.tersedia:
         text = 'Tersedia';
-        color = const Color(0xFF00A83B);
+        color = TokoColors.success;
         break;
 
       case StockStatus.terbatas:
@@ -32,24 +31,18 @@ class StockBadge extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 7,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 4,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 4),
         ],
       ),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: FontWeight.bold,
           color: color,
         ),

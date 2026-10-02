@@ -1,60 +1,36 @@
 import 'package:flutter/material.dart';
 
 import '../models/product.dart';
+import '../theme/app_theme.dart';
 import 'category_tag.dart';
 import 'price_label.dart';
+import 'primary_button.dart';
 import 'stock_badge.dart';
 
-class ProductCard extends StatefulWidget {
+class ProductCard extends StatelessWidget {
   final Product product;
+  final bool isFavorite;
+  final VoidCallback onFavoritePressed;
+  final VoidCallback onAddPressed;
 
   const ProductCard({
     super.key,
     required this.product,
+    required this.isFavorite,
+    required this.onFavoritePressed,
+    required this.onAddPressed,
   });
 
   @override
-  State<ProductCard> createState() => _ProductCardState();
-}
-
-class _ProductCardState extends State<ProductCard> {
-  bool isFavorite = false;
-
-  // Progress bar stok mengikuti status: tersedia penuh, terbatas setengah,
-  // habis nyaris kosong.
-  double _fracStok(StockStatus status) {
-    switch (status) {
-      case StockStatus.tersedia:
-        return 0.85;
-      case StockStatus.terbatas:
-        return 0.45;
-      case StockStatus.habis:
-        return 0.08;
-    }
-  }
-
-  Color _warnaStok(StockStatus status) {
-    switch (status) {
-      case StockStatus.tersedia:
-        return const Color(0xFF00A83B);
-      case StockStatus.terbatas:
-        return Colors.orange;
-      case StockStatus.habis:
-        return Colors.red;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final product = widget.product;
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: TokoColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -65,153 +41,139 @@ class _ProductCardState extends State<ProductCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // GAMBAR PRODUK (BAGIAN ATAS)
             Expanded(
               child: Stack(
                 children: [
                   Positioned.fill(
                     child: Container(
-                      color: const Color(0xFFF2F4F5),
+                      color: TokoColors.paleGreen,
                       child: Icon(
                         product.icon,
-                        size: 64,
-                        color: const Color(0xFF00A83B),
+                        size: 42,
+                        color: TokoColors.primary,
                       ),
                     ),
                   ),
-
-                  // BADGE DISKON: KIRI ATAS
                   if (product.diskon != null)
                     Positioned(
                       top: 8,
-                      left: 6,
+                      left: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
+                          horizontal: 7,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: TokoColors.primary,
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Text(
-                          '${product.diskon}% OFF',
+                          '−${product.diskon}%',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
                     ),
-
-                  // BADGE STOK: KIRI BAWAH
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Material(
+                      color: Colors.white,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: onFavoritePressed,
+                        customBorder: const CircleBorder(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(7),
+                          child: Icon(
+                            isFavorite
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            size: 17,
+                            color: isFavorite
+                                ? TokoColors.primary
+                                : TokoColors.muted,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   Positioned(
                     bottom: 8,
-                    left: 6,
-                    child: StockBadge(
-                      status: product.stockStatus,
-                    ),
+                    left: 8,
+                    child: StockBadge(status: product.stockStatus),
                   ),
                 ],
               ),
             ),
-
-            // INFORMASI PRODUK (BAGIAN BAWAH)
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 7),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Tag kategori dan ikon favorit sejajar horizontal.
-                  Row(
-                    children: [
-                      CategoryTag(
-                        kategori: product.kategori,
-                      ),
-                      const Spacer(),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            isFavorite = !isFavorite;
-                          });
-                        },
-                        child: Icon(
-                          isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          size: 20,
-                          color: isFavorite ? Colors.red : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 4),
-
+                  CategoryTag(kategori: product.kategori),
+                  const SizedBox(height: 3),
                   Text(
                     product.nama,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF303030),
+                      color: TokoColors.ink,
+                      fontSize: 11,
+                      height: 1.2,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-
-                  const SizedBox(height: 6),
-
+                  const SizedBox(height: 3),
                   PriceLabel(
                     harga: product.harga,
                     hargaCoret: product.hargaCoret,
                   ),
-
-                  const SizedBox(height: 4),
-
+                  const SizedBox(height: 3),
                   Row(
                     children: [
                       const Icon(
-                        Icons.star,
+                        Icons.star_rounded,
                         size: 13,
-                        color: Colors.orange,
+                        color: Color(0xFFF6A623),
                       ),
                       const SizedBox(width: 3),
                       Text(
                         '${product.rating}',
                         style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey,
+                          color: TokoColors.muted,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 5),
                       Expanded(
                         child: Text(
                           '${product.terjual}+ terjual',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
+                            color: TokoColors.muted,
+                            fontSize: 9,
                           ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 8),
-
-                  // INDIKATOR STOK: BARIS PROGRES DI BAWAH
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: _fracStok(product.stockStatus),
-                      minHeight: 6,
-                      backgroundColor: Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation(
-                        _warnaStok(product.stockStatus),
-                      ),
-                    ),
+                  const SizedBox(height: 5),
+                  PrimaryButton(
+                    label: product.stockStatus == StockStatus.habis
+                        ? 'Habis'
+                        : 'Tambah',
+                    icon: Icons.add_shopping_cart_rounded,
+                    onPressed: product.stockStatus == StockStatus.habis
+                        ? null
+                        : onAddPressed,
+                    compact: true,
                   ),
                 ],
               ),
